@@ -64,9 +64,10 @@ $(document).ready(function() {
         loadAndDisplayTodos();},
       error:   function(xhr)  { alert('todo update error!') }
     });
-    
   });
 
+  $("#todo-list").sortable();
+  $( "#sortable" ).disableSelection();
 })
 
 var loadAndDisplayTodos = function() {
@@ -80,21 +81,21 @@ var loadAndDisplayTodos = function() {
 }
 
 var displayTodoInterface = function(todos) {
-  $("#todo-interface").text("");
+  $("#todo-form-div").text("");
+  $("#todo-list").text("");
     addTodoForm();
     listTodos(todos);
 };
 
 var addTodoForm = function() {
   this.todoForm =  "<form id='todo_form' action='users/"+ Todo.USER.id +"/todos' method='post'><input type='text' id='newTodo' name='todo' placeholder='add a todo'></form>"
-  $("#todo-interface").append(this.todoForm)
+  $("#todo-form-div").append(this.todoForm)
 }
 
 var listTodos = function(todos) {
   for(var i = 0; i < todos.length; i++) {
     appendTodo(todos[i])
   }
-  $(".todo_list_item").draggable();
 }
 
 
@@ -104,7 +105,7 @@ var appendTodo = function(todo){
     checkBoxFill = '<i class="fa fa-check-square-o"></i>'
   }
   var todoDiv = "<div class='todo_list_item'><div class='check_box' data-id="+ todo.id +" data-complete="+ todo.is_complete +">"+ checkBoxFill +"</div><div class='todo_description'>"+ todo.description +"</div>"
-  $("#todo-interface").append(todoDiv);
+  $("#todo-list").append(todoDiv);
 }
 
 var handleLink = function(link) {
