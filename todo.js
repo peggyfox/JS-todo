@@ -15,43 +15,19 @@ $(document).ready(function() {
 
   $(".form").on("submit", "#users_form", function(event) {
     event.preventDefault();
-    var theEmail = $("#email").val();
-    var thePassword = $("#password").val();
+    var email = $("#email").val();
+    var password = $("#password").val();
     if($(this).attr("action") == "/signup") {
-      Todo.createUser({
-        email:    theEmail,
-        password: thePassword,
-        success:  function(user) { 
-          appendForm("login");
-        },
-        error:    function(xhr)  { alert('Unable to Create Account') }
-      });
+      createUserFromClient(email, password);
     } else if($(this).attr("action") == "/login") {
-      Todo.startSession({
-        email:    theEmail,
-        password: thePassword,
-        success:  function() {
-          displayInSession();
-          loadAndDisplayTodos();
-        },
-        error:    function(xhr)  { alert('Login Error!') }
-      });
+      loginUserFromClient(email, password);
     };
   });
 
   $("#todo-interface").on("submit","#todo_form",function(event) {
     event.preventDefault();
-      var todoDescription = $("#newTodo").val();
-      Todo.createTodo({
-      todo: {
-        description: todoDescription,
-        is_complete: false
-      },
-      success: function(todo) { alert('todo create success!') 
-        loadAndDisplayTodos();
-      },
-      error:   function()     { alert('todo create error!') }
-    });
+    var todoDescription = $("#newTodo").val();
+    createTodoFromClient(todoDescription);
   });
 
   $("#todo-interface").on("click", ".check_box", function() {
@@ -59,21 +35,16 @@ $(document).ready(function() {
     var data_complete = ($(this).attr("data-complete"))
     var isComplete = false
     if(data_complete == 'true'){ isComplete = true} 
-    Todo.updateTodo({
-      todoId: todoId,
-      data: { is_complete: !isComplete },
-      success: function(todo) { 
-        alert('todo update success!') 
-        loadAndDisplayTodos();},
-      error:   function(xhr)  { alert('todo update error!') }
-    });
+    updateTodoFromClient(todoId, isComplete)
   });
 
   $("#todo-list").sortable();
   $( "#sortable" ).disableSelection();
 })
 
-var displayNoSession = function() {
+// ------------------- Interface -------------------------------
+
+function displayNoSession() {
   $(".form").css("display","none")
   $(".homepage").css("display","block");
   $("#user_links_div").css("display","inline");
@@ -81,7 +52,7 @@ var displayNoSession = function() {
   $("#todo-interface").css("display", "none")
 }
 
-var displayInSession = function() {
+function displayInSession() {
   $(".form").css("display","none")
   $(".homepage").css("display","none");
   $("#user_links_div").css("display","none");
@@ -89,10 +60,61 @@ var displayInSession = function() {
   $("#todo-interface").css("display", "block")
 }
 
+// ------------------- Client Functions -------------------------------
+
+function createUserFromClient(userEmail, userPassword) {
+  Todo.createUser({
+    email:    userEmail,
+    password: userPassword,
+    success:  function(user) { 
+      displayInSession();
+      loadAndDisplayTodos();
+    },
+    error:    function(xhr)  { alert('Unable to Create Account') }
+  });
+}
+
+function loginUserFromClient(userEmail, userPassword) {
+  Todo.startSession({
+    email:    userEmail,
+    password: userPassword,
+    success:  function() {
+      displayInSession();
+      loadAndDisplayTodos();
+    },
+    error:    function(xhr)  { alert('Login Error!') }
+  });
+}
+
+function createTodoFromClient(todoDescription) {
+  Todo.createTodo({
+    todo: {
+      description: todoDescription,
+      is_complete: false
+    },
+    success: function(todo) { 
+      loadAndDisplayTodos();
+    },
+    error:   function()     { alert('todo create error!') }
+  });
+}
+
+function updateTodoFromClient(todoId, isComplete) {
+  Todo.updateTodo({
+    todoId: todoId,
+    data: { is_complete: !isComplete },
+    success: function(todo) { 
+      alert('todo update success!') 
+      loadAndDisplayTodos();},
+    error:   function(xhr)  { alert('todo update error!') }
+  });
+}
+
+
 
 // ------------------- Todo List -------------------------------
 
-var loadAndDisplayTodos = function() {
+function loadAndDisplayTodos() {
   Todo.loadTodos({
     success: function(todos) { 
       alert('todo load success!'); 
@@ -102,55 +124,73 @@ var loadAndDisplayTodos = function() {
   });
 }
 
-var displayTodoInterface = function(todos) {
+function displayTodoInterface(todos) {
   $("#todo-form-div").text("");
   $("#todo-list").text("");
     addTodoForm();
     listTodos(todos);
 };
 
-var addTodoForm = function() {
-  this.todoForm =  "<form id='todo_form' action='users/"+ Todo.USER.id +"/todos' method='post'><input type='text' id='newTodo' name='todo' placeholder='add a todo'></form>"
-  $("#todo-form-div").append(this.todoForm)
+function addTodoForm() {
+  var form = createTodoForm(Todo.USER.id);
+  $("#todo-form-div").append(form)
 }
 
-var listTodos = function(todos) {
+function createTodoForm(userId) {
+  var todoForm =  "<form id='todo_form' action='users/"+ userId +"/todos' method='post'><input type='text' id='newTodo' name='todo' placeholder='add a todo'></form>"
+  return todoForm;
+}
+
+function listTodos(todos) {
   for(var i = 0; i < todos.length; i++) {
-    appendTodo(todos[i])
+    appendTodo(todos[i].id, todos[i].description, todos[i].is_complete)
   }
 }
 
-var appendTodo = function(todo){
-  var checkBoxFill = '<i class="fa fa-square-o"></i>'
-  if(todo.is_complete == true){
-    checkBoxFill = '<i class="fa fa-check-square-o"></i>'
-  }
-  var todoDiv = "<div class='todo_list_item'><div class='check_box' data-id="+ todo.id +" data-complete="+ todo.is_complete +">"+ checkBoxFill +"</div><div class='todo_description'>"+ todo.description +"</div>"
+function appendTodo(id, desc, completion) {
+  var checkBoxFill = createCheckBox(completion);
+  var todoDiv = createTodo(id, completion, desc, checkBoxFill)
   $("#todo-list").append(todoDiv);
 }
 
-// ------------------- Signup & Login -------------------------------
-
-
-var handleLink = function(link) {
-  if(link == "signup") {
-    return userForm(link, "Create Account");
-  } else if (link == "login") {
-    return userForm(link, "Log In")
-  };
+function createTodo(id, completion, desc, checkBoxFill) {
+  var todoDiv = "<div class='todo_list_item'><div class='check_box' data-id="+ id +" data-complete="+ completion +">"+ checkBoxFill +"</div><div class='todo_description'>"+ desc +"</div>"
+  return todoDiv
 }
 
-var appendForm = function(link) {
-  var form = handleLink(link);
+function createCheckBox(completion) {
+  var checkBoxFill = '<i class="fa fa-square-o"></i>'
+  if(completion == true){
+    checkBoxFill = '<i class="fa fa-check-square-o"></i>'
+  }
+  return checkBoxFill
+}
+
+
+// ------------------- Signup & Login -------------------------------
+
+function appendForm(link) {
+  var submitText = handleLink(link);
+  var form = userForm(link, submitText);
   $(".homepage").css("display","none");
   $(".form").text("");
   $(".form").append(form);
   $(".form").css("display","block")
 }
 
-function userForm(link, submit) {
-  this.actionMethod = "<form action='/" + link + "' method='post' id='users_form' >";
-  this.inputs = "Email: <input type='text' id='email' name='email' value='fox@mail.com' placeholder='example@todo.com' size='32' height='6'><br>Password: <input type='password' id='password' name='password' value='password'><br>";
-  this.submit = "<div class='submit_button'> <input type='submit' value='" + submit + "' class='submit'></div>";
-  return this.actionMethod + this.inputs + this.submit + "</form>"
+function handleLink(link) {
+  if(link == "signup") {
+    return "Create Account"
+  } else if (link == "login") {
+    return "Log In"
+  };
 }
+
+function userForm(link, submit) {
+  var actionMethod = "<form action='/" + link + "' method='post' id='users_form' >",
+  inputs = "Email: <input type='text' id='email' name='email' value='fox@mail.com' placeholder='example@todo.com' size='32' height='6'><br>Password: <input type='password' id='password' name='password' value='password'><br>",
+  submit = "<div class='submit_button'> <input type='submit' value='" + submit + "' class='submit'></div>",
+  form = actionMethod + inputs + submit + "</form>"
+  return form;
+}
+
