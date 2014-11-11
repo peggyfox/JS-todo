@@ -96,6 +96,10 @@ nav li a:hover {
   }
 }
 
+.user_links, .logout_link {
+  display: inline;
+}
+
 
 .homepage {
   font-family: lato, sans-serif;
