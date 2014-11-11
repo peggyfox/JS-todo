@@ -3,23 +3,25 @@ $(document).ready(function() {
   // var todos = [{id: 1, description: "buy groceries and then go shopping and then finish todo app then go to the park and cook pasta for dinner and then lets add more lines to this", is_complete: false}, {id: 2, description: "laundry", is_complete: true}];
   // displayTodoInterface(todos);
 
-  if(isInSession() == false){
-    $(".homepage").css("display","block");
-    $("#user_links_div").css("display","inline");
-    $("#logout_link_div").css("display","none");
-    $("#todo-interface").css("display", "none")
-  } else {
-    $(".homepage").css("display","none");
-    $("#user_links_div").css("display","none");
-    $("#logout_link_div").css("display","inline");
-    $("#todo-interface").css("display", "block")
+  if(isInSession() == false){ displayNoSession();} 
+  else { 
+    displayInSession();
+    console.log(document.cookie)
+    loadAndDisplayTodos();
+
   }
 
   $(".user_links").on("click", function(event) {
     event.preventDefault();
     var link = $(this).attr("href")
     appendForm(link);
-  })
+  });
+
+  $(".logout_link").on("click", function(event) {
+    event.preventDefault();
+    deleteCookie();
+    displayNoSession();
+  });
 
   $(".form").on("submit", "#users_form", function(event) {
     event.preventDefault();
@@ -40,11 +42,7 @@ $(document).ready(function() {
         password: thePassword,
         success:  function() {
           createCookie();
-          $(".form").css("display","none")
-          $(".homepage").css("display","none");
-          $("#user_links_div").css("display","none");
-          $("#logout_link_div").css("display","inline");
-          $("#todo-interface").css("display", "block")
+          displayInSession();
           loadAndDisplayTodos();
         },
         error:    function(xhr)  { alert('Login Error!') }
@@ -86,7 +84,22 @@ $(document).ready(function() {
   $( "#sortable" ).disableSelection();
 })
 
-// ------------------- Sessions -------------------------------
+var displayNoSession = function() {
+  $(".form").css("display","none")
+  $(".homepage").css("display","block");
+  $("#user_links_div").css("display","inline");
+  $("#logout_link_div").css("display","none");
+  $("#todo-interface").css("display", "none")
+}
+
+var displayInSession = function() {
+  $(".homepage").css("display","none");
+  $("#user_links_div").css("display","none");
+  $("#logout_link_div").css("display","inline");
+  $("#todo-interface").css("display", "block")
+}
+
+// ------------------- Browser Sessions -------------------------------
 
 var isInSession = function() {
   console.log(document.cookie)
@@ -96,14 +109,16 @@ var isInSession = function() {
 };
 
 var createCookie = function() {
-  document.cookie = "userid="+ Todo.USER.id + "; expires=Fri, 31 Dec 2014 23:59:59 UTC";
-  debugger;
-  console.log(document.cookie)
+  document.cookie = "user="+ Todo.USER + "; expires=Fri, 31 Dec 2014 23:59:59 UTC";
 };
 
 var deleteCookie = function() {
-  document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+  console.log(document.cookie)
 };
+
+
+// ------------------- Todo List -------------------------------
 
 var loadAndDisplayTodos = function() {
   Todo.loadTodos({
@@ -133,7 +148,6 @@ var listTodos = function(todos) {
   }
 }
 
-
 var appendTodo = function(todo){
   var checkBoxFill = '<i class="fa fa-square-o"></i>'
   if(todo.is_complete == true){
@@ -142,6 +156,9 @@ var appendTodo = function(todo){
   var todoDiv = "<div class='todo_list_item'><div class='check_box' data-id="+ todo.id +" data-complete="+ todo.is_complete +">"+ checkBoxFill +"</div><div class='todo_description'>"+ todo.description +"</div>"
   $("#todo-list").append(todoDiv);
 }
+
+// ------------------- Signup & Login -------------------------------
+
 
 var handleLink = function(link) {
   if(link == "signup") {
