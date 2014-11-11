@@ -3,6 +3,18 @@ $(document).ready(function() {
   // var todos = [{id: 1, description: "buy groceries and then go shopping and then finish todo app then go to the park and cook pasta for dinner and then lets add more lines to this", is_complete: false}, {id: 2, description: "laundry", is_complete: true}];
   // displayTodoInterface(todos);
 
+  if(isInSession() == false){
+    $(".homepage").css("display","block");
+    $("#user_links_div").css("display","inline");
+    $("#logout_link_div").css("display","none");
+    $("#todo-interface").css("display", "none")
+  } else {
+    $(".homepage").css("display","none");
+    $("#user_links_div").css("display","none");
+    $("#logout_link_div").css("display","inline");
+    $("#todo-interface").css("display", "block")
+  }
+
   $(".user_links").on("click", function(event) {
     event.preventDefault();
     var link = $(this).attr("href")
@@ -27,7 +39,11 @@ $(document).ready(function() {
         email:    theEmail,
         password: thePassword,
         success:  function() {
+          createCookie();
           $(".form").css("display","none")
+          $(".homepage").css("display","none");
+          $("#user_links_div").css("display","none");
+          $("#logout_link_div").css("display","inline");
           $("#todo-interface").css("display", "block")
           loadAndDisplayTodos();
         },
@@ -69,6 +85,25 @@ $(document).ready(function() {
   $("#todo-list").sortable();
   $( "#sortable" ).disableSelection();
 })
+
+// ------------------- Sessions -------------------------------
+
+var isInSession = function() {
+  console.log(document.cookie)
+  if(document.cookie) {
+    return true
+  } {return false};
+};
+
+var createCookie = function() {
+  document.cookie = "userid="+ Todo.USER.id + "; expires=Fri, 31 Dec 2014 23:59:59 UTC";
+  debugger;
+  console.log(document.cookie)
+};
+
+var deleteCookie = function() {
+  document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+};
 
 var loadAndDisplayTodos = function() {
   Todo.loadTodos({
