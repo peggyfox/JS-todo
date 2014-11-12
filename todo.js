@@ -10,6 +10,7 @@ $(document).ready(function() {
 
   $(".logout_link").on("click", function(event) {
     event.preventDefault();
+    logoutUserFromClient();
     displayNoSession();
   });
 
@@ -86,6 +87,15 @@ function loginUserFromClient(userEmail, userPassword) {
   });
 }
 
+function logoutUserFromClient() {
+  Todo.endSession({
+    success: function(todo) { 
+      console.log(todo);
+    },
+    error:   function(xhr)  { alert('Logout Error!') }
+  });
+}
+
 function createTodoFromClient(todoDescription) {
   Todo.createTodo({
     todo: {
@@ -95,7 +105,7 @@ function createTodoFromClient(todoDescription) {
     success: function(todo) { 
       loadAndDisplayTodos();
     },
-    error:   function()     { alert('todo create error!') }
+    error:   function()     { alert('Todo Create Error!') }
   });
 }
 
@@ -104,9 +114,9 @@ function updateTodoFromClient(todoId, isComplete) {
     todoId: todoId,
     data: { is_complete: !isComplete },
     success: function(todo) { 
-      alert('todo update success!') 
-      loadAndDisplayTodos();},
-    error:   function(xhr)  { alert('todo update error!') }
+      loadAndDisplayTodos();
+    },
+    error:   function(xhr)  { alert('Todo Update Error!') }
   });
 }
 
@@ -116,8 +126,7 @@ function updateTodoFromClient(todoId, isComplete) {
 
 function loadAndDisplayTodos() {
   Todo.loadTodos({
-    success: function(todos) { 
-      alert('todo load success!'); 
+    success: function(todos) {  
       displayTodoInterface(todos);
     },
     error:   function(xhr)   { alert('todo load error!') }

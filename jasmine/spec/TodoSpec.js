@@ -26,6 +26,24 @@ describe("User Forms", function() {
 });
 
 describe("Sessions", function() {
+  beforeEach(function() {
+    jasmine.Ajax.install();
+    loginUserFromClient("fox@mail.com","password");
+    request = jasmine.Ajax.requests.mostRecent();
+
+    describe("loginUserFromClient", function() {
+      beforeEach(function() {
+      request.response(TestResponses.user);
+      
+      });
+      it("should start a user session if the user exists", function() {
+
+        expect(Todo.USER.id).toEqual(519);
+      });
+
+    })
+
+  }
 
   // describe("createUserFromClient",function() {
 
@@ -36,14 +54,6 @@ describe("Sessions", function() {
 
   // })
 
-  // describe("loginUserFromClient", function() {
-
-  //   it("should start a user session if the user exists", function() {
-  //     loginUserFromClient("fox@mail.com","password");
-  //     expect(Todo.USER.id).toEqual(519);
-  //   });
-
-  // })
 
 })
 
