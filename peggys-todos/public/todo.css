@@ -100,6 +100,10 @@ nav li a:hover {
   display: inline;
 }
 
+.container {
+  margin-top: 50px;
+}
+
 
 .homepage {
   font-family: lato, sans-serif;
