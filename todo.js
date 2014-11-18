@@ -1,6 +1,13 @@
 $(document).ready(function() {
-  
-  displayNoSession();
+
+  if(Todo.USER.id == null && isInSession() == true) {
+    Todo.USER.id = localStorage.getItem("userID");
+    Todo.USER.api_token = localStorage.getItem("userAPI");
+    displayInSession();
+    loadAndDisplayTodos();
+  } else { 
+    displayNoSession();
+  }
 
   $(".user_links").on("click", function(event) {
     event.preventDefault();
@@ -10,6 +17,7 @@ $(document).ready(function() {
 
   $(".logout_link").on("click", function(event) {
     event.preventDefault();
+    removeUserFromStorage();
     logoutUserFromClient();
     displayNoSession();
   });
@@ -61,6 +69,25 @@ function displayInSession() {
   $("#todo-interface").css("display", "block")
 }
 
+// ------------------- Browser Sessions -------------------------------
+
+function isInSession() {
+  if(localStorage.getItem("userID")) {
+    return true
+  } else {return false};
+};
+
+function storeUser() {
+  localStorage.setItem("userID", Todo.USER.id);
+  localStorage.setItem("userAPI", Todo.USER.api_token);
+};
+
+function removeUserFromStorage() {
+  localStorage.removeItem("userID");
+  localStorage.removeItem("userAPI");
+};
+
+
 // ------------------- Client Functions -------------------------------
 
 function createUserFromClient(userEmail, userPassword) {
@@ -68,6 +95,7 @@ function createUserFromClient(userEmail, userPassword) {
     email:    userEmail,
     password: userPassword,
     success:  function(user) { 
+      storeUser();
       displayInSession();
       loadAndDisplayTodos();
     },
@@ -80,6 +108,7 @@ function loginUserFromClient(userEmail, userPassword) {
     email:    userEmail,
     password: userPassword,
     success:  function() {
+      storeUser();
       displayInSession();
       loadAndDisplayTodos();
     },
@@ -89,8 +118,7 @@ function loginUserFromClient(userEmail, userPassword) {
 
 function logoutUserFromClient() {
   Todo.endSession({
-    success: function(todo) { 
-      console.log(todo);
+    success: function(todo) {
     },
     error:   function(xhr)  { alert('Logout Error!') }
   });
