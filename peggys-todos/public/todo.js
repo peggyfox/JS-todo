@@ -225,7 +225,7 @@ function handleLink(link) {
 
 function userForm(link, submit) {
   var actionMethod = "<form action='/" + link + "' method='post' id='users_form' >",
-  inputs = "Email: <input type='text' id='email' name='email' value='fox@mail.com' placeholder='example@todo.com' size='32' height='6'><br>Password: <input type='password' id='password' name='password' value='password'><br>",
+  inputs = "Email: <input type='text' id='email' name='email' placeholder='example@todo.com' size='32' height='6'><br>Password: <input type='password' id='password' name='password' ><br>",
   submit = "<div class='submit_button'> <input type='submit' value='" + submit + "' class='submit'></div>",
   form = actionMethod + inputs + submit + "</form>"
   return form;
