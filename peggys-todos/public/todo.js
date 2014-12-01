@@ -48,7 +48,7 @@ $(document).ready(function() {
   });
 
   $("#todo-list").sortable();
-  $( "#sortable" ).disableSelection();
+  $("#todo-list").disableSelection();
 })
 
 // ------------------- Interface -------------------------------
